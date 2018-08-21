@@ -3,9 +3,10 @@
 
 #pragma once
 
-#include <stdint.h>
 #include <algorithm>
 #include <atomic>
+
+#include <stdint.h>
 #include <cstdint>
 #include <functional>
 #include <iostream>
@@ -19,8 +20,9 @@
 #include "onnx/common/assertions.h"
 #include "onnx/common/graph_node_list.h"
 #include "onnx/common/interned_strings.h"
-#include "onnx/common/tensor.h"
 #include "onnx/string_utils.h"
+
+#include "onnx/common/tensor.h"
 
 #define ONNX_DISALLOW_COPY_AND_ASSIGN(TypeName) \
   TypeName(const TypeName&) = delete;           \
