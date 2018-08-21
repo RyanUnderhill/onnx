@@ -187,7 +187,8 @@ void OpSchema::Verify(const NodeProto& node) const {
     } else if (allows_unchecked_attributes_ || isInternalSymbol(name)) {
       continue;
     } else {
-      fail_check("Unrecognized attribute: ", name, " for operator ", node.op_type());
+      fail_check(
+          "Unrecognized attribute: ", name, " for operator ", node.op_type());
     }
 
     if (attr_proto.has_ref_attr_name()) {
