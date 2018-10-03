@@ -27,6 +27,7 @@ Tensor tensorProtoToTensor(const ONNX_NAMESPACE::TensorProto & tp) {
     break;
   }
   case ONNX_NAMESPACE::TensorProto_DataType_FLOAT16:
+  case ONNX_NAMESPACE::TensorProto_DataType_BFLOAT16:
   case ONNX_NAMESPACE::TensorProto_DataType_BOOL:
   case ONNX_NAMESPACE::TensorProto_DataType_INT8:
   case ONNX_NAMESPACE::TensorProto_DataType_INT16:
@@ -277,6 +278,16 @@ std::unique_ptr<Graph> graphProtoToGraph(const ONNX_NAMESPACE::GraphProto& gp, b
   }
 
   for (int i = 0; i < gp.output_size(); i++) {
+    if (!value_by_name_of.count(gp.output(i).name()) && nested) {
+      // Same captured value logic as above. We can consider outputs of a
+      // graph to be "inputs" of a dummy "output" node. The same lexical
+      // scoping rules are valid here, thus we need to add a dummy node
+      // in the case of an undefined reference
+      auto * undef = g->create(kCaptured, 1);
+      g->appendNode(undef);
+      undef->outputs()[0]->setUniqueName(gp.output(i).name());
+      value_by_name_of[gp.output(i).name()] = undef->outputs()[0];
+    }
     value_by_name_of[gp.output(i).name()]->setElemType(gp.output(i).type().tensor_type().elem_type());
     value_by_name_of[gp.output(i).name()]->setSizes(tensorShapeProtoToDimensions(gp.output(i).type().tensor_type().shape()));
     g->registerOutput(value_by_name_of[gp.output(i).name()]);
@@ -345,6 +356,7 @@ void encodeTensor(ONNX_NAMESPACE::TensorProto * p, const Tensor & tensor) {
     break;
   }
   case ONNX_NAMESPACE::TensorProto_DataType_FLOAT16:
+  case ONNX_NAMESPACE::TensorProto_DataType_BFLOAT16:
   case ONNX_NAMESPACE::TensorProto_DataType_BOOL:
   case ONNX_NAMESPACE::TensorProto_DataType_INT8:
   case ONNX_NAMESPACE::TensorProto_DataType_INT16:
